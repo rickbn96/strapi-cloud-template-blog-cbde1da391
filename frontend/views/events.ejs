@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Eventi</h1>
+        <p>Scopri i nostri eventi dedicati alla cybersecurity in Italia</p>
+    </div>
+</section>
+
+<!-- Upcoming Events Section -->
+<section class="section events-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Prossimi Eventi</h2>
+            <p>Partecipa ai nostri eventi in arrivo per connetterti con la comunità cybersecurity italiana</p>
+        </div>
+        
+        <div class="events-grid">
+            <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+                <% upcomingEvents.forEach(event => { %>
+                    <div class="event-card">
+                        <div class="event-image">
+                            <% if (event.attributes.image && event.attributes.image.data) { %>
+                                <img src="<%= strapiUrl + event.attributes.image.data.attributes.url %>" alt="<%= event.attributes.title %>">
+                            <% } else { %>
+                                <img src="/images/default-event.jpg" alt="Event">
+                            <% } %>
+                            <div class="event-date">
+                                <div class="day"><%= new Date(event.attributes.startDate).getDate() %></div>
+                                <div class="month"><%= new Date(event.attributes.startDate).toLocaleString('it-IT', { month: 'short' }) %></div>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <h3><%= event.attributes.title %></h3>
+                            <div class="event-meta">
+                                <p><i class="far fa-clock"></i> <%= formatTime(event.attributes.startDate) %> - <%= formatTime(event.attributes.endDate) %></p>
+                                <p><i class="fas fa-map-marker-alt"></i> <%= event.attributes.venue %>, <%= event.attributes.city %></p>
+                            </div>
+                            <p class="event-description"><%= event.attributes.description.substring(0, 150) %>...</p>
+                            <div class="event-actions">
+                                <a href="/events/<%= event.attributes.slug %>" class="btn btn-outline">Dettagli</a>
+                                <a href="<%= event.attributes.registrationLink %>" class="btn btn-primary" target="_blank">Registrati</a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="no-content">
+                    <p>Nessun evento in programma al momento. Continua a seguirci per future comunicazioni!</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Past Events Section -->
+<section class="section past-events-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Eventi Passati</h2>
+            <p>Rivivi i nostri eventi passati e scopri cosa ti sei perso</p>
+        </div>
+        
+        <div class="events-grid past-events">
+            <% if (pastEvents && pastEvents.length > 0) { %>
+                <% pastEvents.forEach(event => { %>
+                    <div class="event-card past-event">
+                        <div class="event-image">
+                            <% if (event.attributes.image && event.attributes.image.data) { %>
+                                <img src="<%= strapiUrl + event.attributes.image.data.attributes.url %>" alt="<%= event.attributes.title %>">
+                            <% } else { %>
+                                <img src="/images/default-event.jpg" alt="Event">
+                            <% } %>
+                            <div class="event-date past">
+                                <div class="day"><%= new Date(event.attributes.startDate).getDate() %></div>
+                                <div class="month"><%= new Date(event.attributes.startDate).toLocaleString('it-IT', { month: 'short' }) %></div>
+                            </div>
+                        </div>
+                        <div class="event-content">
+                            <h3><%= event.attributes.title %></h3>
+                            <div class="event-meta">
+                                <p><i class="far fa-calendar-alt"></i> <%= formatDate(event.attributes.startDate) %></p>
+                                <p><i class="fas fa-map-marker-alt"></i> <%= event.attributes.venue %>, <%= event.attributes.city %></p>
+                            </div>
+                            <p class="event-description"><%= event.attributes.description.substring(0, 150) %>...</p>
+                            <div class="event-actions">
+                                <a href="/events/<%= event.attributes.slug %>" class="btn btn-outline">Dettagli</a>
+                                <% if (event.attributes.content && event.attributes.content.length > 0) { %>
+                                    <span class="event-badge">Contenuti disponibili</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="no-content">
+                    <p>Nessun evento passato da mostrare.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Host Your Own Event Section -->
+<section class="section host-event-section">
+    <div class="container">
+        <div class="host-event-content">
+            <div class="host-event-text">
+                <h2>Vuoi organizzare un evento con noi?</h2>
+                <p>Se sei interessato ad ospitare un evento CyberCon nella tua città o azienda, contattaci. Offriamo workshop, conferenze e sessioni formative personalizzate.</p>
+                <a href="/contact" class="btn btn-primary">Contattaci</a>
+            </div>
+            <div class="host-event-image">
+                <img src="/images/host-event.jpg" alt="Host an event">
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>
