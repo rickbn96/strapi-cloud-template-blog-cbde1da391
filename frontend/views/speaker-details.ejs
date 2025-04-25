@@ -1,0 +1,213 @@
+<%- include('partials/header') %>
+
+<% if (speaker) { %>
+    <!-- Speaker Header -->
+    <section class="speaker-header">
+        <div class="container">
+            <div class="speaker-header-content">
+                <div class="speaker-avatar">
+                    <% if (speaker.attributes.photo && speaker.attributes.photo.data) { %>
+                        <img src="<%= strapiUrl + speaker.attributes.photo.data.attributes.url %>" alt="<%= speaker.attributes.name %>">
+                    <% } else { %>
+                        <img src="/images/default-speaker.jpg" alt="Speaker">
+                    <% } %>
+                </div>
+                <div class="speaker-info">
+                    <h1><%= speaker.attributes.name %></h1>
+                    <p class="speaker-title"><%= speaker.attributes.title %></p>
+                    <% if (speaker.attributes.company) { %>
+                        <p class="speaker-company"><%= speaker.attributes.company %></p>
+                    <% } %>
+                    
+                    <% if (speaker.attributes.expertise && speaker.attributes.expertise.length > 0) { %>
+                        <div class="speaker-expertise">
+                            <% speaker.attributes.expertise.forEach(expertise => { %>
+                                <span class="expertise-tag"><%= expertise.name %></span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                    
+                    <div class="speaker-social">
+                        <% if (speaker.attributes.linkedin) { %>
+                            <a href="<%= speaker.attributes.linkedin %>" class="social-icon" target="_blank">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        <% } %>
+                        <% if (speaker.attributes.twitter) { %>
+                            <a href="<%= speaker.attributes.twitter %>" class="social-icon" target="_blank">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        <% } %>
+                    </div>
+
+                    <div class="share-buttons">
+                        <span>Condividi:</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(`https://cybercon.it/speakers/${speaker.attributes.slug}`) %>" target="_blank" class="share-btn facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent(`https://cybercon.it/speakers/${speaker.attributes.slug}`) %>&text=<%= encodeURIComponent(`${speaker.attributes.name} - ${speaker.attributes.title}`) %>" target="_blank" class="share-btn twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url=<%= encodeURIComponent(`https://cybercon.it/speakers/${speaker.attributes.slug}`) %>&title=<%= encodeURIComponent(`${speaker.attributes.name} - ${speaker.attributes.title}`) %>" target="_blank" class="share-btn linkedin">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <button class="share-btn copy-link" data-link="https://cybercon.it/speakers/<%= speaker.attributes.slug %>">
+                            <i class="fas fa-link"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Speaker Content -->
+    <section class="section speaker-content-section">
+        <div class="container">
+            <div class="speaker-content-wrapper">
+                <div class="speaker-main-content">
+                    <!-- Speaker Bio -->
+                    <div class="speaker-bio-block">
+                        <h2>Biografia</h2>
+                        <div class="bio-content">
+                            <p><%= speaker.attributes.bio %></p>
+                        </div>
+                    </div>
+
+                    <!-- Speaker's Events -->
+                    <% if (speaker.attributes.events && speaker.attributes.events.data && speaker.attributes.events.data.length > 0) { %>
+                        <div class="speaker-events-block">
+                            <h2>Eventi</h2>
+                            <div class="events-grid speaker-events">
+                                <% speaker.attributes.events.data.forEach(event => { %>
+                                    <div class="event-card">
+                                        <div class="event-image">
+                                            <% if (event.attributes.image && event.attributes.image.data) { %>
+                                                <img src="<%= strapiUrl + event.attributes.image.data.attributes.url %>" alt="<%= event.attributes.title %>">
+                                            <% } else { %>
+                                                <img src="/images/default-event.jpg" alt="Event">
+                                            <% } %>
+                                            <% 
+                                            // Check if event is in the future
+                                            const now = new Date();
+                                            const eventDate = new Date(event.attributes.startDate);
+                                            const isPastEvent = eventDate <= now;
+                                            %>
+                                            <div class="event-date <%= isPastEvent ? 'past' : '' %>">
+                                                <div class="day"><%= eventDate.getDate() %></div>
+                                                <div class="month"><%= eventDate.toLocaleString('it-IT', { month: 'short' }) %></div>
+                                            </div>
+                                        </div>
+                                        <div class="event-content">
+                                            <h3><%= event.attributes.title %></h3>
+                                            <div class="event-meta">
+                                                <p><i class="far fa-calendar-alt"></i> <%= formatDate(event.attributes.startDate) %></p>
+                                                <p><i class="fas fa-map-marker-alt"></i> <%= event.attributes.venue %>, <%= event.attributes.city %></p>
+                                            </div>
+                                            <div class="event-actions">
+                                                <a href="/events/<%= event.attributes.slug %>" class="btn btn-outline">Dettagli</a>
+                                                <% if (!isPastEvent) { %>
+                                                    <a href="<%= event.attributes.registrationLink %>" class="btn btn-primary" target="_blank">Registrati</a>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <!-- Get in touch -->
+                    <div class="get-in-touch-block">
+                        <h2>Contatta <%= speaker.attributes.name.split(' ')[0] %></h2>
+                        <p>Ti piacerebbe invitare <%= speaker.attributes.name %> a parlare al tuo evento o intervistarlo per il tuo podcast?</p>
+                        <a href="/contact?subject=Contatto%20per%20<%= encodeURIComponent(speaker.attributes.name) %>" class="btn btn-primary">Contattaci</a>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="speaker-sidebar">
+                    <!-- Similar Speakers -->
+                    <div class="sidebar-section">
+                        <h3>Speaker Simili</h3>
+                        <div class="similar-speakers">
+                            <!-- This would be populated dynamically with speakers of similar expertise -->
+                            <div class="similar-speaker">
+                                <img src="/images/default-speaker.jpg" alt="Speaker">
+                                <div class="similar-speaker-info">
+                                    <h4>Mario Rossi</h4>
+                                    <p>Security Researcher</p>
+                                    <a href="/speakers/mario-rossi">Vedi profilo</a>
+                                </div>
+                            </div>
+                            <div class="similar-speaker">
+                                <img src="/images/default-speaker.jpg" alt="Speaker">
+                                <div class="similar-speaker-info">
+                                    <h4>Laura Bianchi</h4>
+                                    <p>CISO</p>
+                                    <a href="/speakers/laura-bianchi">Vedi profilo</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speaker Resources -->
+                    <div class="sidebar-section">
+                        <h3>Risorse</h3>
+                        <ul class="resource-links">
+                            <li><a href="#"><i class="fas fa-file-powerpoint"></i> Presentazioni</a></li>
+                            <li><a href="#"><i class="fas fa-book"></i> Articoli</a></li>
+                            <li><a href="#"><i class="fas fa-video"></i> Video</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Copy Link Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.querySelector('.copy-link');
+        
+        if (copyButton) {
+            copyButton.addEventListener('click', function() {
+                const link = this.dataset.link;
+                navigator.clipboard.writeText(link).then(() => {
+                    // Create a temporary tooltip
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'copy-tooltip';
+                    tooltip.textContent = 'Link copiato!';
+                    
+                    // Position the tooltip
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.top = rect.top - 30 + 'px';
+                    tooltip.style.left = rect.left + (rect.width / 2) - 40 + 'px';
+                    
+                    // Add to body
+                    document.body.appendChild(tooltip);
+                    
+                    // Remove after 2 seconds
+                    setTimeout(() => {
+                        tooltip.remove();
+                    }, 2000);
+                });
+            });
+        }
+    });
+    </script>
+<% } else { %>
+    <!-- 404 Content -->
+    <div class="error-page">
+        <div class="error-content">
+            <h1>404</h1>
+            <h2>Speaker Non Trovato</h2>
+            <p>Lo speaker che stai cercando non esiste o è stato rimosso.</p>
+            <div class="hero-btns">
+                <a href="/speakers" class="btn btn-primary">Torna agli Speaker</a>
+                <a href="/" class="btn btn-outline">Home</a>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<%- include('partials/footer') %>
