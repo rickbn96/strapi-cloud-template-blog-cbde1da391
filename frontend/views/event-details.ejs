@@ -1,0 +1,334 @@
+<%- include('partials/header') %>
+
+<% if (event) { %>
+    <!-- Event Header -->
+    <section class="event-header">
+        <div class="container">
+            <div class="event-header-content">
+                <div class="event-cover">
+                    <% if (event.attributes.image && event.attributes.image.data) { %>
+                        <img src="<%= strapiUrl + event.attributes.image.data.attributes.url %>" alt="<%= event.attributes.title %>">
+                    <% } else { %>
+                        <img src="/images/default-event.jpg" alt="Event">
+                    <% } %>
+                </div>
+                <div class="event-info">
+                    <h1><%= event.attributes.title %></h1>
+                    <div class="event-meta">
+                        <p><i class="far fa-calendar-alt"></i> <%= formatDate(event.attributes.startDate) %> - <%= formatDate(event.attributes.endDate) %></p>
+                        <p><i class="far fa-clock"></i> <%= formatTime(event.attributes.startDate) %> - <%= formatTime(event.attributes.endDate) %></p>
+                        <p><i class="fas fa-map-marker-alt"></i> <%= event.attributes.venue %>, <%= event.attributes.location %></p>
+                    </div>
+                    <p class="event-description"><%= event.attributes.description %></p>
+                    
+                    <% 
+                    // Check if event is in the future
+                    const now = new Date();
+                    const eventDate = new Date(event.attributes.startDate);
+                    const isFutureEvent = eventDate > now;
+                    %>
+                    
+                    <% if (isFutureEvent) { %>
+                        <div class="event-actions">
+                            <a href="<%= event.attributes.registrationLink %>" class="btn btn-primary" target="_blank">Registrati Ora</a>
+                            <div class="share-buttons">
+                                <span>Condividi:</span>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(`https://cybercon.it/events/${event.attributes.slug}`) %>" target="_blank" class="share-btn facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent(`https://cybercon.it/events/${event.attributes.slug}`) %>&text=<%= encodeURIComponent(event.attributes.title) %>" target="_blank" class="share-btn twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="https://www.linkedin.com/shareArticle?mini=true&url=<%= encodeURIComponent(`https://cybercon.it/events/${event.attributes.slug}`) %>&title=<%= encodeURIComponent(event.attributes.title) %>" target="_blank" class="share-btn linkedin">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <button class="share-btn copy-link" data-link="https://cybercon.it/events/<%= event.attributes.slug %>">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Countdown Timer -->
+                        <div class="event-countdown" data-target="<%= event.attributes.startDate %>">
+                            <div class="countdown-title">L'evento inizia tra:</div>
+                            <div class="countdown">
+                                <div class="countdown-item">
+                                    <div class="countdown-number days">00</div>
+                                    <div class="countdown-label">Giorni</div>
+                                </div>
+                                <div class="countdown-item">
+                                    <div class="countdown-number hours">00</div>
+                                    <div class="countdown-label">Ore</div>
+                                </div>
+                                <div class="countdown-item">
+                                    <div class="countdown-number minutes">00</div>
+                                    <div class="countdown-label">Minuti</div>
+                                </div>
+                                <div class="countdown-item">
+                                    <div class="countdown-number seconds">00</div>
+                                    <div class="countdown-label">Secondi</div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="event-badge past-event-badge">Evento Concluso</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Content -->
+    <section class="section event-content-section">
+        <div class="container">
+            <div class="event-content-wrapper">
+                <div class="event-main-content">
+                    <!-- Event Details -->
+                    <div class="event-details-block">
+                        <h2>Dettagli dell'evento</h2>
+                        <% if (event.attributes.content && event.attributes.content.length > 0) { %>
+                            <div class="event-blocks">
+                                <% event.attributes.content.forEach(block => { %>
+                                    <% if (block.__component === 'shared.rich-text') { %>
+                                        <div class="content-block text-block">
+                                            <%- block.content %>
+                                        </div>
+                                    <% } else if (block.__component === 'shared.media') { %>
+                                        <div class="content-block media-block">
+                                            <% if (block.file && block.file.data) { %>
+                                                <% if (block.file.data.attributes.mime.startsWith('image/')) { %>
+                                                    <img src="<%= strapiUrl + block.file.data.attributes.url %>" alt="<%= block.caption || 'Media' %>">
+                                                <% } else if (block.file.data.attributes.mime.startsWith('video/')) { %>
+                                                    <video controls>
+                                                        <source src="<%= strapiUrl + block.file.data.attributes.url %>" type="<%= block.file.data.attributes.mime %>">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                <% } %>
+                                                <% if (block.caption) { %>
+                                                    <p class="media-caption"><%= block.caption %></p>
+                                                <% } %>
+                                            <% } %>
+                                        </div>
+                                    <% } else if (block.__component === 'shared.quote') { %>
+                                        <div class="content-block quote-block">
+                                            <blockquote>
+                                                <p>"<%= block.quote %>"</p>
+                                                <% if (block.author) { %>
+                                                    <cite>— <%= block.author %></cite>
+                                                <% } %>
+                                            </blockquote>
+                                        </div>
+                                    <% } %>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p>Per maggiori dettagli sull'evento, registrati o contattaci.</p>
+                        <% } %>
+                    </div>
+
+                    <!-- Agenda (if available) -->
+                    <% if (event.attributes.agenda) { %>
+                        <div class="event-agenda-block">
+                            <h2>Agenda</h2>
+                            <div class="agenda-content">
+                                <%- event.attributes.agenda %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <!-- Speakers Section (if available) -->
+                    <% if (event.attributes.speakers && event.attributes.speakers.data && event.attributes.speakers.data.length > 0) { %>
+                        <div class="event-speakers-block">
+                            <h2>Speakers</h2>
+                            <div class="speakers-grid">
+                                <% event.attributes.speakers.data.forEach(speaker => { %>
+                                    <div class="speaker-card">
+                                        <div class="speaker-image">
+                                            <% if (speaker.attributes.photo && speaker.attributes.photo.data) { %>
+                                                <img src="<%= strapiUrl + speaker.attributes.photo.data.attributes.url %>" alt="<%= speaker.attributes.name %>">
+                                            <% } else { %>
+                                                <img src="/images/default-speaker.jpg" alt="Speaker">
+                                            <% } %>
+                                        </div>
+                                        <div class="speaker-info">
+                                            <h3><%= speaker.attributes.name %></h3>
+                                            <p><%= speaker.attributes.title %></p>
+                                            <div class="speaker-social">
+                                                <% if (speaker.attributes.linkedin) { %>
+                                                    <a href="<%= speaker.attributes.linkedin %>" class="social-icon" target="_blank">
+                                                        <i class="fab fa-linkedin-in"></i>
+                                                    </a>
+                                                <% } %>
+                                                <% if (speaker.attributes.twitter) { %>
+                                                    <a href="<%= speaker.attributes.twitter %>" class="social-icon" target="_blank">
+                                                        <i class="fab fa-twitter"></i>
+                                                    </a>
+                                                <% } %>
+                                            </div>
+                                            <a href="/speakers/<%= speaker.attributes.slug %>" class="read-more">Scopri di più</a>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <!-- Location Map (if address is available) -->
+                    <% if (event.attributes.address) { %>
+                        <div class="event-location-block">
+                            <h2>Come Arrivare</h2>
+                            <div class="location-details">
+                                <div class="location-text">
+                                    <p><strong><%= event.attributes.venue %></strong></p>
+                                    <p><%= event.attributes.address %></p>
+                                    <p><%= event.attributes.city %></p>
+                                </div>
+                                <div class="location-map">
+                                    <iframe 
+                                        width="100%" 
+                                        height="300" 
+                                        frameborder="0" 
+                                        scrolling="no" 
+                                        marginheight="0" 
+                                        marginwidth="0" 
+                                        src="https://maps.google.com/maps?q=<%= encodeURIComponent(event.attributes.address + ', ' + event.attributes.city) %>&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                                    </iframe>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="event-sidebar">
+                    <!-- Registration Info -->
+                    <% if (isFutureEvent) { %>
+                        <div class="sidebar-section registration-info">
+                            <h3>Registrazione</h3>
+                            <p>La registrazione è richiesta per partecipare a questo evento. I posti sono limitati.</p>
+                            <a href="<%= event.attributes.registrationLink %>" class="btn btn-primary sidebar-btn" target="_blank">Registrati Ora</a>
+                        </div>
+                    <% } %>
+
+                    <!-- Event Tickets (if available) -->
+                    <% if (event.attributes.tickets) { %>
+                        <div class="sidebar-section ticket-info">
+                            <h3>Biglietti</h3>
+                            <% 
+                            let tickets;
+                            try {
+                                tickets = JSON.parse(event.attributes.tickets);
+                            } catch (e) {
+                                tickets = [];
+                            }
+                            
+                            if (Array.isArray(tickets) && tickets.length > 0) { %>
+                                <div class="ticket-types">
+                                    <% tickets.forEach(ticket => { %>
+                                        <div class="ticket-type">
+                                            <h4><%= ticket.name %></h4>
+                                            <p class="ticket-price"><%= ticket.price %></p>
+                                            <p class="ticket-description"><%= ticket.description %></p>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } else { %>
+                                <p>Informazioni sui biglietti non disponibili al momento.</p>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <!-- Contact Information -->
+                    <div class="sidebar-section contact-info">
+                        <h3>Informazioni di Contatto</h3>
+                        <p>Per qualsiasi domanda riguardante questo evento, non esitare a contattarci.</p>
+                        <p><i class="far fa-envelope"></i> <a href="mailto:eventi@cybercon.it">eventi@cybercon.it</a></p>
+                        <p><i class="fas fa-phone-alt"></i> <a href="tel:+390123456789">+39 012 345 6789</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Copy Link Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Copy Link button
+        const copyButton = document.querySelector('.copy-link');
+        
+        if (copyButton) {
+            copyButton.addEventListener('click', function() {
+                const link = this.dataset.link;
+                navigator.clipboard.writeText(link).then(() => {
+                    // Create a temporary tooltip
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'copy-tooltip';
+                    tooltip.textContent = 'Link copiato!';
+                    
+                    // Position the tooltip
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.top = rect.top - 30 + 'px';
+                    tooltip.style.left = rect.left + (rect.width / 2) - 40 + 'px';
+                    
+                    // Add to body
+                    document.body.appendChild(tooltip);
+                    
+                    // Remove after 2 seconds
+                    setTimeout(() => {
+                        tooltip.remove();
+                    }, 2000);
+                });
+            });
+        }
+        
+        // Countdown Timer
+        const countdownElement = document.querySelector('.event-countdown');
+        
+        if (countdownElement) {
+            const targetDate = new Date(countdownElement.dataset.target).getTime();
+            
+            // Update the countdown every 1 second
+            const countdown = setInterval(function() {
+                // Get current date and time
+                const now = new Date().getTime();
+                
+                // Find the time difference between now and the target date
+                const distance = targetDate - now;
+                
+                // Time calculations for days, hours, minutes and seconds
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                // Display the result
+                document.querySelector('.days').textContent = days.toString().padStart(2, '0');
+                document.querySelector('.hours').textContent = hours.toString().padStart(2, '0');
+                document.querySelector('.minutes').textContent = minutes.toString().padStart(2, '0');
+                document.querySelector('.seconds').textContent = seconds.toString().padStart(2, '0');
+                
+                // If the countdown is over, display a message
+                if (distance < 0) {
+                    clearInterval(countdown);
+                    countdownElement.innerHTML = '<div class="countdown-expired">L\'evento è iniziato!</div>';
+                }
+            }, 1000);
+        }
+    });
+    </script>
+<% } else { %>
+    <!-- 404 Content -->
+    <div class="error-page">
+        <div class="error-content">
+            <h1>404</h1>
+            <h2>Evento Non Trovato</h2>
+            <p>L'evento che stai cercando non esiste o è stato rimosso.</p>
+            <div class="hero-btns">
+                <a href="/events" class="btn btn-primary">Torna agli Eventi</a>
+                <a href="/" class="btn btn-outline">Home</a>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<%- include('partials/footer') %>
