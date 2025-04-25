@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Pagina Non Trovata | CyberCon</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/images/favicon.png">
+</head>
+<body>
+    <!-- Italian flag stripe -->
+    <div class="flag-stripe">
+        <div class="green"></div>
+        <div class="white"></div>
+        <div class="red"></div>
+    </div>
+
+    <!-- Error Page Content -->
+    <div class="error-page">
+        <div class="error-content">
+            <h1>404</h1>
+            <h2>Pagina Non Trovata</h2>
+            <p><%= message || 'La pagina che stai cercando non esiste o è stata spostata.' %></p>
+            <div class="hero-btns">
+                <a href="/" class="btn btn-primary">Torna alla Home</a>
+                <a href="/contact" class="btn btn-outline">Contattaci</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to home script -->
+    <script>
+        // Add automatic redirect after 10 seconds
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 10000);
+    </script>
+</body>
+</html>
