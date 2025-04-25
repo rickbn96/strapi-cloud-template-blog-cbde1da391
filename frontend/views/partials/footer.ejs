@@ -1,0 +1,98 @@
+<!-- Footer -->
+<footer>
+    <div class="container footer-container">
+        <div class="footer-about">
+            <div class="footer-logo">
+                <img src="/images/logo.png" alt="CyberCon Logo">
+                <span>CyberCon</span>
+            </div>
+            <p>CyberCon è una comunità dedicata alla cybersecurity che mira ad andare "oltre il perimetro" delle conoscenze tradizionali per esplorare le frontiere della sicurezza informatica.</p>
+            <div class="footer-social">
+                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h3 class="footer-heading">Link Utili</h3>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/podcast">Podcast</a></li>
+                <li><a href="/events">Eventi</a></li>
+                <li><a href="/speakers">Speaker</a></li>
+                <li><a href="/about">Chi Siamo</a></li>
+                <li><a href="/contact">Contatti</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h3 class="footer-heading">Risorse</h3>
+            <ul>
+                <li><a href="/podcast">Tutti gli Episodi</a></li>
+                <li><a href="/events">Prossimi Eventi</a></li>
+                <li><a href="#">Webinar</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Termini e Condizioni</a></li>
+            </ul>
+        </div>
+        <div class="footer-newsletter">
+            <h3 class="footer-heading">Newsletter</h3>
+            <p>Iscriviti alla nostra newsletter per ricevere aggiornamenti sui nostri podcast ed eventi.</p>
+            <form class="newsletter-form" id="newsletter-form">
+                <input type="email" class="newsletter-input" name="email" placeholder="La tua email" required>
+                <button type="submit" class="newsletter-btn">Iscriviti</button>
+            </form>
+            <p id="newsletter-message"></p>
+            <p class="privacy-note">Ci impegniamo a rispettare la tua privacy. Non condivideremo mai i tuoi dati con terze parti.</p>
+        </div>
+    </div>
+    <div class="container footer-bottom">
+        <p>&copy; <%= new Date().getFullYear() %> CyberCon. Tutti i diritti riservati. Oltre il perimetro.</p>
+    </div>
+</footer>
+
+<!-- Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<!-- Newsletter Subscription Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const newsletterForm = document.getElementById('newsletter-form');
+    const newsletterMessage = document.getElementById('newsletter-message');
+    
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = this.email.value;
+            
+            try {
+                const response = await fetch('/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    newsletterMessage.textContent = data.message;
+                    newsletterMessage.className = 'success-message';
+                    newsletterForm.reset();
+                } else {
+                    newsletterMessage.textContent = data.message;
+                    newsletterMessage.className = 'error-message';
+                }
+            } catch (error) {
+                newsletterMessage.textContent = 'Si è verificato un errore. Riprova più tardi.';
+                newsletterMessage.className = 'error-message';
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>
