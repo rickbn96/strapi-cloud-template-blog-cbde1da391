@@ -1,0 +1,279 @@
+<%- include('partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="container hero-content">
+        <div class="hero-text">
+            <h1>CyberCon <span>Oltre il perimetro</span></h1>
+            <p>Esplora il mondo della cybersecurity con il nostro podcast e partecipa al nostro evento fisico in Italia. Scopri le ultime tendenze, minacce e soluzioni nel campo della sicurezza informatica.</p>
+            <div class="hero-btns">
+                <a href="/podcast" class="btn btn-primary">Ascolta il Podcast</a>
+                <a href="/events" class="btn btn-outline">Scopri l'Evento</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="/images/hero-illustration.png" alt="CyberCon Illustration">
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="section" id="about">
+    <div class="container">
+        <div class="section-header">
+            <h2>Chi Siamo</h2>
+            <p>CyberCon è una comunità dedicata alla cybersecurity che mira ad andare "oltre il perimetro" delle conoscenze tradizionali per esplorare le frontiere della sicurezza informatica.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎙️</div>
+                <h3>Podcast</h3>
+                <p>Un podcast dedicato alla cybersecurity con interviste ad esperti, analisi di casi reali e discussioni sulle ultime tendenze.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏢</div>
+                <h3>Eventi</h3>
+                <p>Eventi fisici in Italia che riuniscono professionisti, esperti e appassionati di sicurezza informatica per networking e formazione.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👨‍💻</div>
+                <h3>Comunità</h3>
+                <p>Una comunità attiva di professionisti della sicurezza informatica che condividono conoscenze, esperienze e best practice.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Podcast Section -->
+<section class="section" id="podcast">
+    <div class="container">
+        <div class="section-header">
+            <h2>Ultimi Episodi</h2>
+            <p>Ascolta gli ultimi episodi del nostro podcast dedicato alla cybersecurity, con interviste ad esperti e analisi approfondite.</p>
+        </div>
+        <div class="podcast-episodes">
+            <% if (episodes && episodes.length > 0) { %>
+                <% episodes.forEach(episode => { %>
+                    <div class="episode-card">
+                        <div class="episode-image">
+                            <% if (episode.attributes.coverImage && episode.attributes.coverImage.data) { %>
+                                <img src="<%= strapiUrl + episode.attributes.coverImage.data.attributes.url %>" alt="<%= episode.attributes.title %>">
+                            <% } else { %>
+                                <img src="/images/default-episode.jpg" alt="Episode">
+                            <% } %>
+                            <div class="play-btn">▶</div>
+                        </div>
+                        <div class="episode-content">
+                            <h3><%= episode.attributes.title %></h3>
+                            <div class="episode-meta">
+                                <span><%= formatDate(episode.attributes.releaseDate) %></span>
+                                <span><%= episode.attributes.duration %></span>
+                            </div>
+                            <p><%= episode.attributes.description.substring(0, 120) %>...</p>
+                            <div class="episode-tags">
+                                <% if (episode.attributes.tags && episode.attributes.tags.length > 0) { %>
+                                    <% episode.attributes.tags.forEach(tag => { %>
+                                        <span class="tag"><%= tag.name %></span>
+                                    <% }) %>
+                                <% } %>
+                            </div>
+                            <a href="/podcast/<%= episode.attributes.slug %>" class="read-more">Ascolta l'episodio</a>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="no-content">
+                    <p>Nessun episodio disponibile al momento.</p>
+                </div>
+            <% } %>
+        </div>
+        <div class="view-all">
+            <a href="/podcast" class="btn btn-outline">Visualizza tutti gli episodi</a>
+        </div>
+    </div>
+</section>
+
+<!-- Event Section -->
+<section class="section event" id="event">
+    <div class="container event-container">
+        <div class="section-header">
+            <h2>Prossimo Evento</h2>
+            <p>Partecipa al nostro evento fisico in Italia dedicato alla cybersecurity, con workshop, conferenze e opportunità di networking.</p>
+        </div>
+        
+        <% if (upcomingEvent) { %>
+            <div class="countdown" data-target="<%= upcomingEvent.attributes.startDate %>">
+                <div class="countdown-item">
+                    <div class="countdown-number days">00</div>
+                    <div class="countdown-label">Giorni</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number hours">00</div>
+                    <div class="countdown-label">Ore</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number minutes">00</div>
+                    <div class="countdown-label">Minuti</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number seconds">00</div>
+                    <div class="countdown-label">Secondi</div>
+                </div>
+            </div>
+            <div class="event-details">
+                <h3><%= upcomingEvent.attributes.title %></h3>
+                <div class="event-info">
+                    <p><i class="far fa-calendar-alt"></i> <%= formatDate(upcomingEvent.attributes.startDate) %> - <%= formatDate(upcomingEvent.attributes.endDate) %></p>
+                    <p><i class="fas fa-map-marker-alt"></i> <%= upcomingEvent.attributes.city %>, Italia</p>
+                    <p><i class="far fa-building"></i> <%= upcomingEvent.attributes.venue %></p>
+                </div>
+                <a href="<%= upcomingEvent.attributes.registrationLink %>" class="btn btn-primary" target="_blank">Registrati Ora</a>
+                <a href="/events/<%= upcomingEvent.attributes.slug %>" class="btn btn-outline">Maggiori Dettagli</a>
+            </div>
+        <% } else { %>
+            <div class="no-content">
+                <p>Nessun evento programmato al momento. Continua a seguirci per aggiornamenti.</p>
+            </div>
+        <% } %>
+    </div>
+</section>
+
+<!-- Speakers Section -->
+<section class="section" id="speakers">
+    <div class="container">
+        <div class="section-header">
+            <h2>I Nostri Speaker</h2>
+            <p>Incontra i nostri esperti di cybersecurity che condivideranno le loro conoscenze ed esperienze durante i nostri eventi.</p>
+        </div>
+        <div class="speakers-grid">
+            <% if (speakers && speakers.length > 0) { %>
+                <% speakers.forEach(speaker => { %>
+                    <div class="speaker-card">
+                        <div class="speaker-image">
+                            <% if (speaker.attributes.photo && speaker.attributes.photo.data) { %>
+                                <img src="<%= strapiUrl + speaker.attributes.photo.data.attributes.url %>" alt="<%= speaker.attributes.name %>">
+                            <% } else { %>
+                                <img src="/images/default-speaker.jpg" alt="Speaker">
+                            <% } %>
+                        </div>
+                        <div class="speaker-info">
+                            <h3><%= speaker.attributes.name %></h3>
+                            <p><%= speaker.attributes.title %></p>
+                            <div class="speaker-social">
+                                <% if (speaker.attributes.linkedin) { %>
+                                    <a href="<%= speaker.attributes.linkedin %>" class="social-icon" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                <% } %>
+                                <% if (speaker.attributes.twitter) { %>
+                                    <a href="<%= speaker.attributes.twitter %>" class="social-icon" target="_blank"><i class="fab fa-twitter"></i></a>
+                                <% } %>
+                            </div>
+                            <a href="/speakers/<%= speaker.attributes.slug %>" class="read-more">Scopri di più</a>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="no-content">
+                    <p>Nessun speaker disponibile al momento.</p>
+                </div>
+            <% } %>
+        </div>
+        <div class="view-all">
+            <a href="/speakers" class="btn btn-outline">Visualizza tutti gli speaker</a>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="section newsletter-section">
+    <div class="container">
+        <div class="newsletter-container">
+            <div class="newsletter-content">
+                <h2>Iscriviti alla Newsletter</h2>
+                <p>Resta aggiornato sui nostri podcast, eventi e ultime novità nel mondo della cybersecurity.</p>
+            </div>
+            <div class="newsletter-form-container">
+                <form class="newsletter-inline-form" id="newsletter-inline-form">
+                    <input type="email" name="email" placeholder="La tua email" required>
+                    <button type="submit" class="btn btn-primary">Iscriviti</button>
+                </form>
+                <p id="newsletter-inline-message"></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Countdown Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countdownElement = document.querySelector('.countdown');
+    
+    if (countdownElement) {
+        const targetDate = new Date(countdownElement.dataset.target).getTime();
+        
+        // Update the countdown every 1 second
+        const countdown = setInterval(function() {
+            // Get current date and time
+            const now = new Date().getTime();
+            
+            // Find the time difference between now and the target date
+            const distance = targetDate - now;
+            
+            // Time calculations for days, hours, minutes and seconds
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            // Display the result
+            document.querySelector('.days').textContent = days.toString().padStart(2, '0');
+            document.querySelector('.hours').textContent = hours.toString().padStart(2, '0');
+            document.querySelector('.minutes').textContent = minutes.toString().padStart(2, '0');
+            document.querySelector('.seconds').textContent = seconds.toString().padStart(2, '0');
+            
+            // If the countdown is over, display a message
+            if (distance < 0) {
+                clearInterval(countdown);
+                document.querySelector('.countdown').innerHTML = '<div class="countdown-expired">L\'evento è iniziato!</div>';
+            }
+        }, 1000);
+    }
+    
+    // Inline Newsletter Form
+    const newsletterInlineForm = document.getElementById('newsletter-inline-form');
+    const newsletterInlineMessage = document.getElementById('newsletter-inline-message');
+    
+    if (newsletterInlineForm) {
+        newsletterInlineForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = this.email.value;
+            
+            try {
+                const response = await fetch('/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    newsletterInlineMessage.textContent = data.message;
+                    newsletterInlineMessage.className = 'success-message';
+                    newsletterInlineForm.reset();
+                } else {
+                    newsletterInlineMessage.textContent = data.message;
+                    newsletterInlineMessage.className = 'error-message';
+                }
+            } catch (error) {
+                newsletterInlineMessage.textContent = 'Si è verificato un errore. Riprova più tardi.';
+                newsletterInlineMessage.className = 'error-message';
+            }
+        });
+    }
+});
+</script>
+
+<%- include('partials/footer') %>
