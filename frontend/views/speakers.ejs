@@ -1,0 +1,159 @@
+<%- include('partials/header') %>
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Speaker</h1>
+        <p>Scopri gli esperti che condividono le loro conoscenze nei nostri eventi e podcast</p>
+    </div>
+</section>
+
+<!-- Speakers Section -->
+<section class="section speakers-section">
+    <div class="container">
+        <!-- Filter Options -->
+        <div class="filter-options">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Cerca speaker...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="expertise-filter">
+                <select id="expertise-select">
+                    <option value="">Tutte le specializzazioni</option>
+                    <option value="cybersecurity">Cybersecurity</option>
+                    <option value="hacking">Ethical Hacking</option>
+                    <option value="privacy">Privacy & GDPR</option>
+                    <option value="forensics">Digital Forensics</option>
+                    <option value="cloud">Cloud Security</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Speakers Grid -->
+        <div class="speakers-grid-main">
+            <% if (speakers && speakers.length > 0) { %>
+                <% speakers.forEach(speaker => { %>
+                    <div class="speaker-card">
+                        <div class="speaker-image">
+                            <% if (speaker.attributes.photo && speaker.attributes.photo.data) { %>
+                                <img src="<%= strapiUrl + speaker.attributes.photo.data.attributes.url %>" alt="<%= speaker.attributes.name %>">
+                            <% } else { %>
+                                <img src="/images/default-speaker.jpg" alt="Speaker">
+                            <% } %>
+                        </div>
+                        <div class="speaker-info">
+                            <h3><%= speaker.attributes.name %></h3>
+                            <p class="speaker-title"><%= speaker.attributes.title %></p>
+                            <% if (speaker.attributes.company) { %>
+                                <p class="speaker-company"><%= speaker.attributes.company %></p>
+                            <% } %>
+                            
+                            <% if (speaker.attributes.expertise && speaker.attributes.expertise.length > 0) { %>
+                                <div class="speaker-expertise">
+                                    <% speaker.attributes.expertise.forEach(expertise => { %>
+                                        <span class="expertise-tag"><%= expertise.name %></span>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="speaker-social">
+                                <% if (speaker.attributes.linkedin) { %>
+                                    <a href="<%= speaker.attributes.linkedin %>" class="social-icon" target="_blank">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </a>
+                                <% } %>
+                                <% if (speaker.attributes.twitter) { %>
+                                    <a href="<%= speaker.attributes.twitter %>" class="social-icon" target="_blank">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                <% } %>
+                            </div>
+                            <a href="/speakers/<%= speaker.attributes.slug %>" class="btn btn-outline speaker-btn">Scopri di più</a>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="no-content">
+                    <p>Nessun speaker disponibile al momento.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Become a Speaker Section -->
+<section class="section become-speaker-section">
+    <div class="container">
+        <div class="become-speaker-content">
+            <div class="become-speaker-text">
+                <h2>Diventa uno Speaker</h2>
+                <p>Sei un esperto di cybersecurity e vorresti condividere le tue conoscenze? Unisciti a noi come speaker nei nostri eventi o come ospite nel nostro podcast.</p>
+                <ul class="benefits-list">
+                    <li><i class="fas fa-check"></i> Condividi la tua esperienza con la comunità</li>
+                    <li><i class="fas fa-check"></i> Espandi il tuo network professionale</li>
+                    <li><i class="fas fa-check"></i> Aumenta la tua visibilità nel settore</li>
+                    <li><i class="fas fa-check"></i> Contribuisci alla crescita della cultura della sicurezza informatica</li>
+                </ul>
+                <a href="/contact" class="btn btn-primary">Contattaci</a>
+            </div>
+            <div class="become-speaker-image">
+                <img src="/images/become-speaker.jpg" alt="Become a speaker">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search and filter script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const expertiseSelect = document.getElementById('expertise-select');
+    const speakerCards = document.querySelectorAll('.speaker-card');
+    
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', performSearch);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+    
+    if (expertiseSelect) {
+        expertiseSelect.addEventListener('change', filterByExpertise);
+    }
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        window.location.href = `/speakers?search=${encodeURIComponent(searchTerm)}`;
+    }
+    
+    function filterByExpertise() {
+        const expertise = expertiseSelect.value;
+        if (expertise) {
+            window.location.href = `/speakers?expertise=${encodeURIComponent(expertise)}`;
+        } else {
+            window.location.href = '/speakers';
+        }
+    }
+    
+    // Set initial values from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const expertiseParam = urlParams.get('expertise');
+    
+    if (searchParam && searchInput) {
+        searchInput.value = searchParam;
+    }
+    
+    if (expertiseParam && expertiseSelect) {
+        expertiseSelect.value = expertiseParam;
+    }
+});
+</script>
+
+<%- include('partials/footer') %>
