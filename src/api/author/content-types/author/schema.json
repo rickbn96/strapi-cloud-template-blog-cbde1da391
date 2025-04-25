@@ -29,6 +29,21 @@
       "relation": "oneToMany",
       "target": "api::article.article",
       "mappedBy": "author"
+    },
+    "episodes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::episode.episode",
+      "mappedBy": "author"
+    },
+    "bio": {
+      "type": "text"
+    },
+    "role": {
+      "type": "string"
+    },
+    "social": {
+      "type": "json"
     }
   }
 }
