@@ -1,0 +1,245 @@
+<%- include('partials/header') %>
+
+<% if (episode) { %>
+    <!-- Episode Header -->
+    <section class="episode-header">
+        <div class="container">
+            <div class="episode-header-content">
+                <div class="episode-cover">
+                    <% if (episode.attributes.coverImage && episode.attributes.coverImage.data) { %>
+                        <img src="<%= strapiUrl + episode.attributes.coverImage.data.attributes.url %>" alt="<%= episode.attributes.title %>">
+                    <% } else { %>
+                        <img src="/images/default-episode.jpg" alt="Episode">
+                    <% } %>
+                </div>
+                <div class="episode-info">
+                    <h1><%= episode.attributes.title %></h1>
+                    <div class="episode-meta">
+                        <span><i class="far fa-calendar-alt"></i> <%= formatDate(episode.attributes.releaseDate) %></span>
+                        <span><i class="far fa-clock"></i> <%= episode.attributes.duration %></span>
+                        <% if (episode.attributes.category && episode.attributes.category.data) { %>
+                            <span><i class="far fa-folder"></i> <%= episode.attributes.category.data.attributes.name %></span>
+                        <% } %>
+                    </div>
+                    <p class="episode-description"><%= episode.attributes.description %></p>
+                    <div class="episode-tags">
+                        <% if (episode.attributes.tags && episode.attributes.tags.length > 0) { %>
+                            <% episode.attributes.tags.forEach(tag => { %>
+                                <span class="tag"><%= tag.name %></span>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                    <div class="episode-actions">
+                        <button class="btn btn-primary play-episode-btn" 
+                                data-audio="<%= episode.attributes.audioFile && episode.attributes.audioFile.data ? 
+                                strapiUrl + episode.attributes.audioFile.data.attributes.url : '' %>"
+                                data-title="<%= episode.attributes.title %>">
+                            <i class="fas fa-play"></i> Ascolta Ora
+                        </button>
+                        <div class="share-buttons">
+                            <span>Condividi:</span>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(`https://cybercon.it/podcast/${episode.attributes.slug}`) %>" target="_blank" class="share-btn facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent(`https://cybercon.it/podcast/${episode.attributes.slug}`) %>&text=<%= encodeURIComponent(episode.attributes.title) %>" target="_blank" class="share-btn twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/shareArticle?mini=true&url=<%= encodeURIComponent(`https://cybercon.it/podcast/${episode.attributes.slug}`) %>&title=<%= encodeURIComponent(episode.attributes.title) %>" target="_blank" class="share-btn linkedin">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <button class="share-btn copy-link" data-link="https://cybercon.it/podcast/<%= episode.attributes.slug %>">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Podcast Player (Fixed at top, initially hidden) -->
+    <div id="podcast-player" class="podcast-player">
+        <div class="container player-container">
+            <div class="player-info">
+                <h3 id="episode-title"><%= episode.attributes.title %></h3>
+            </div>
+            <div class="player-controls">
+                <button id="play-btn" class="player-btn"><i class="fas fa-play"></i></button>
+                <button id="pause-btn" class="player-btn" style="display: none;"><i class="fas fa-pause"></i></button>
+                <div class="progress-container">
+                    <input type="range" id="progress-bar" class="progress" min="0" max="100" value="0">
+                    <div class="time-info">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+            <audio id="podcast-audio" preload="metadata" src="<%= episode.attributes.audioFile && episode.attributes.audioFile.data ? 
+                                strapiUrl + episode.attributes.audioFile.data.attributes.url : '' %>"></audio>
+        </div>
+    </div>
+
+    <!-- Episode Content -->
+    <section class="section episode-content-section">
+        <div class="container">
+            <div class="episode-content-wrapper">
+                <div class="episode-main-content">
+                    <% if (episode.attributes.content && episode.attributes.content.length > 0) { %>
+                        <div class="episode-blocks">
+                            <% episode.attributes.content.forEach(block => { %>
+                                <% if (block.__component === 'shared.rich-text') { %>
+                                    <div class="content-block text-block">
+                                        <%- block.content %>
+                                    </div>
+                                <% } else if (block.__component === 'shared.media') { %>
+                                    <div class="content-block media-block">
+                                        <% if (block.file && block.file.data) { %>
+                                            <% if (block.file.data.attributes.mime.startsWith('image/')) { %>
+                                                <img src="<%= strapiUrl + block.file.data.attributes.url %>" alt="<%= block.caption || 'Media' %>">
+                                            <% } else if (block.file.data.attributes.mime.startsWith('video/')) { %>
+                                                <video controls>
+                                                    <source src="<%= strapiUrl + block.file.data.attributes.url %>" type="<%= block.file.data.attributes.mime %>">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            <% } %>
+                                            <% if (block.caption) { %>
+                                                <p class="media-caption"><%= block.caption %></p>
+                                            <% } %>
+                                        <% } %>
+                                    </div>
+                                <% } else if (block.__component === 'shared.quote') { %>
+                                    <div class="content-block quote-block">
+                                        <blockquote>
+                                            <p>"<%= block.quote %>"</p>
+                                            <% if (block.author) { %>
+                                                <cite>— <%= block.author %></cite>
+                                            <% } %>
+                                        </blockquote>
+                                    </div>
+                                <% } %>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <div class="placeholder-content">
+                            <p>Ascolta l'episodio per scoprire tutti i dettagli.</p>
+                        </div>
+                    <% } %>
+
+                    <!-- Author Info (if available) -->
+                    <% if (episode.attributes.author && episode.attributes.author.data) { %>
+                        <div class="author-box">
+                            <div class="author-image">
+                                <% if (episode.attributes.author.data.attributes.avatar && episode.attributes.author.data.attributes.avatar.data) { %>
+                                    <img src="<%= strapiUrl + episode.attributes.author.data.attributes.avatar.data.attributes.url %>" alt="<%= episode.attributes.author.data.attributes.name %>">
+                                <% } else { %>
+                                    <img src="/images/default-avatar.jpg" alt="Author">
+                                <% } %>
+                            </div>
+                            <div class="author-info">
+                                <h3>A cura di <%= episode.attributes.author.data.attributes.name %></h3>
+                                <% if (episode.attributes.author.data.attributes.bio) { %>
+                                    <p><%= episode.attributes.author.data.attributes.bio %></p>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="episode-sidebar">
+                    <!-- Related Episodes -->
+                    <div class="sidebar-section">
+                        <h3>Episodi Correlati</h3>
+                        <% if (relatedEpisodes && relatedEpisodes.length > 0) { %>
+                            <div class="related-episodes">
+                                <% relatedEpisodes.forEach(relEpisode => { %>
+                                    <div class="related-episode-card">
+                                        <div class="related-episode-image">
+                                            <% if (relEpisode.attributes.coverImage && relEpisode.attributes.coverImage.data) { %>
+                                                <img src="<%= strapiUrl + relEpisode.attributes.coverImage.data.attributes.url %>" alt="<%= relEpisode.attributes.title %>">
+                                            <% } else { %>
+                                                <img src="/images/default-episode.jpg" alt="Episode">
+                                            <% } %>
+                                        </div>
+                                        <div class="related-episode-info">
+                                            <h4><a href="/podcast/<%= relEpisode.attributes.slug %>"><%= relEpisode.attributes.title %></a></h4>
+                                            <span class="episode-date"><%= formatDate(relEpisode.attributes.releaseDate) %></span>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p>Nessun episodio correlato disponibile.</p>
+                        <% } %>
+                    </div>
+
+                    <!-- Subscribe Section -->
+                    <div class="sidebar-section subscribe-sidebar">
+                        <h3>Ascoltaci su</h3>
+                        <div class="podcast-platforms-sidebar">
+                            <a href="#" class="platform-link" target="_blank">
+                                <i class="fab fa-spotify"></i> Spotify
+                            </a>
+                            <a href="#" class="platform-link" target="_blank">
+                                <i class="fab fa-apple"></i> Apple Podcasts
+                            </a>
+                            <a href="#" class="platform-link" target="_blank">
+                                <i class="fab fa-google"></i> Google Podcasts
+                            </a>
+                            <a href="#" class="platform-link" target="_blank">
+                                <i class="fas fa-rss"></i> RSS Feed
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Copy Link Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.querySelector('.copy-link');
+        
+        if (copyButton) {
+            copyButton.addEventListener('click', function() {
+                const link = this.dataset.link;
+                navigator.clipboard.writeText(link).then(() => {
+                    // Create a temporary tooltip
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'copy-tooltip';
+                    tooltip.textContent = 'Link copiato!';
+                    
+                    // Position the tooltip
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.top = rect.top - 30 + 'px';
+                    tooltip.style.left = rect.left + (rect.width / 2) - 40 + 'px';
+                    
+                    // Add to body
+                    document.body.appendChild(tooltip);
+                    
+                    // Remove after 2 seconds
+                    setTimeout(() => {
+                        tooltip.remove();
+                    }, 2000);
+                });
+            });
+        }
+    });
+    </script>
+<% } else { %>
+    <!-- 404 Content -->
+    <div class="error-page">
+        <div class="error-content">
+            <h1>404</h1>
+            <h2>Episodio Non Trovato</h2>
+            <p>L'episodio che stai cercando non esiste o è stato rimosso.</p>
+            <div class="hero-btns">
+                <a href="/podcast" class="btn btn-primary">Torna agli Episodi</a>
+                <a href="/" class="btn btn-outline">Home</a>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<%- include('partials/footer') %>
