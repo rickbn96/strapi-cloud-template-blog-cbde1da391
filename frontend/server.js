@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * CyberCon Frontend Server
+ * CyberCon Frontend Server - Strapi Cloud Version
  */
 
 const express = require('express');
@@ -11,7 +11,17 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.STRAPI_URL || 'https://your-project.api.strapi.cloud';
+const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
+
+// Create Axios instance with authentication
+const strapiApi = axios.create({
+  baseURL: STRAPI_URL,
+  headers: {
+    'Authorization': `Bearer ${STRAPI_API_TOKEN}`,
+    'Content-Type': 'application/json'
+  }
+});
 
 // Set EJS as templating engine
 app.set('view engine', 'ejs');
@@ -34,19 +44,56 @@ app.locals.formatTime = (dateString) => {
   return new Date(dateString).toLocaleTimeString('it-IT', options);
 };
 
+// Error handling middleware for API requests
+const handleApiError = (error, res, message) => {
+  console.error(`API Error: ${message}`, error.response?.data || error.message);
+  
+  // Determine if it's an authentication error
+  if (error.response?.status === 401 || error.response?.status === 403) {
+    console.error('Authentication error - check your STRAPI_API_TOKEN');
+  }
+  
+  return res.status(500).render('error', { 
+    title: 'Error',
+    message: `Sorry, we encountered an error: ${message}. Please try again later.` 
+  });
+};
+
 // Routes
 app.get('/', async (req, res) => {
   try {
     // Fetch latest episodes
-    const episodesRes = await axios.get(`${STRAPI_URL}/api/episodes?populate=*&sort[releaseDate]=desc&pagination[limit]=3`);
+    const episodesRes = await strapiApi.get('/api/episodes', { 
+      params: {
+        populate: '*',
+        sort: ['releaseDate:desc'],
+        pagination: { limit: 3 }
+      }
+    });
     const episodes = episodesRes.data.data;
 
     // Fetch upcoming event
-    const eventsRes = await axios.get(`${STRAPI_URL}/api/events?populate[0]=image&populate[1]=speakers.photo&sort[startDate]=asc&filters[startDate][$gt]=${new Date().toISOString()}&pagination[limit]=1`);
+    const eventsRes = await strapiApi.get('/api/events', {
+      params: {
+        populate: ['image', 'speakers.photo'],
+        sort: ['startDate:asc'],
+        filters: {
+          startDate: {
+            $gt: new Date().toISOString()
+          }
+        },
+        pagination: { limit: 1 }
+      }
+    });
     const upcomingEvent = eventsRes.data.data[0];
 
     // Fetch speakers
-    const speakersRes = await axios.get(`${STRAPI_URL}/api/speakers?populate=*&pagination[limit]=4`);
+    const speakersRes = await strapiApi.get('/api/speakers', {
+      params: {
+        populate: '*',
+        pagination: { limit: 4 }
+      }
+    });
     const speakers = speakersRes.data.data;
 
     res.render('index', {
@@ -56,13 +103,7 @@ app.get('/', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching data:', error);
-    res.render('index', { 
-      episodes: [], 
-      upcomingEvent: null, 
-      speakers: [],
-      strapiUrl: STRAPI_URL
-    });
+    handleApiError(error, res, 'Failed to load homepage content');
   }
 });
 
@@ -73,7 +114,17 @@ app.get('/podcast', async (req, res) => {
     const pageSize = 6;
     
     // Fetch episodes with pagination
-    const episodesRes = await axios.get(`${STRAPI_URL}/api/episodes?populate=*&sort[releaseDate]=desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`);
+    const episodesRes = await strapiApi.get('/api/episodes', {
+      params: {
+        populate: '*',
+        sort: ['releaseDate:desc'],
+        pagination: {
+          page,
+          pageSize
+        }
+      }
+    });
+    
     const episodes = episodesRes.data.data;
     const pagination = episodesRes.data.meta.pagination;
 
@@ -83,12 +134,7 @@ app.get('/podcast', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching episodes:', error);
-    res.render('podcast', { 
-      episodes: [], 
-      pagination: { page: 1, pageSize: 6, pageCount: 1, total: 0 },
-      strapiUrl: STRAPI_URL
-    });
+    handleApiError(error, res, 'Failed to load podcast episodes');
   }
 });
 
@@ -98,7 +144,17 @@ app.get('/podcast/:slug', async (req, res) => {
     const { slug } = req.params;
     
     // Fetch episode by slug
-    const episodeRes = await axios.get(`${STRAPI_URL}/api/episodes?populate=*&filters[slug][$eq]=${slug}`);
+    const episodeRes = await strapiApi.get('/api/episodes', {
+      params: {
+        populate: '*',
+        filters: {
+          slug: {
+            $eq: slug
+          }
+        }
+      }
+    });
+    
     const episode = episodeRes.data.data[0];
 
     if (!episode) {
@@ -109,7 +165,23 @@ app.get('/podcast/:slug', async (req, res) => {
     let relatedEpisodes = [];
     if (episode.attributes.category && episode.attributes.category.data) {
       const categoryId = episode.attributes.category.data.id;
-      const relatedRes = await axios.get(`${STRAPI_URL}/api/episodes?populate=*&filters[category][id][$eq]=${categoryId}&filters[id][$ne]=${episode.id}&pagination[limit]=3`);
+      const relatedRes = await strapiApi.get('/api/episodes', {
+        params: {
+          populate: '*',
+          filters: {
+            category: {
+              id: {
+                $eq: categoryId
+              }
+            },
+            id: {
+              $ne: episode.id
+            }
+          },
+          pagination: { limit: 3 }
+        }
+      });
+      
       relatedEpisodes = relatedRes.data.data;
     }
 
@@ -119,8 +191,7 @@ app.get('/podcast/:slug', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching episode:', error);
-    res.status(404).render('404', { message: 'Episodio non trovato' });
+    handleApiError(error, res, 'Failed to load episode details');
   }
 });
 
@@ -128,7 +199,13 @@ app.get('/podcast/:slug', async (req, res) => {
 app.get('/events', async (req, res) => {
   try {
     // Fetch all events
-    const eventsRes = await axios.get(`${STRAPI_URL}/api/events?populate=*&sort[startDate]=desc`);
+    const eventsRes = await strapiApi.get('/api/events', {
+      params: {
+        populate: '*',
+        sort: ['startDate:desc']
+      }
+    });
+    
     const events = eventsRes.data.data;
 
     // Split into upcoming and past events
@@ -142,12 +219,7 @@ app.get('/events', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching events:', error);
-    res.render('events', { 
-      upcomingEvents: [], 
-      pastEvents: [],
-      strapiUrl: STRAPI_URL
-    });
+    handleApiError(error, res, 'Failed to load events');
   }
 });
 
@@ -157,7 +229,17 @@ app.get('/events/:slug', async (req, res) => {
     const { slug } = req.params;
     
     // Fetch event by slug
-    const eventRes = await axios.get(`${STRAPI_URL}/api/events?populate[0]=image&populate[1]=speakers.photo&populate[2]=content&filters[slug][$eq]=${slug}`);
+    const eventRes = await strapiApi.get('/api/events', {
+      params: {
+        populate: ['image', 'speakers.photo', 'content'],
+        filters: {
+          slug: {
+            $eq: slug
+          }
+        }
+      }
+    });
+    
     const event = eventRes.data.data[0];
 
     if (!event) {
@@ -169,8 +251,7 @@ app.get('/events/:slug', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching event details:', error);
-    res.status(404).render('404', { message: 'Evento non trovato' });
+    handleApiError(error, res, 'Failed to load event details');
   }
 });
 
@@ -178,7 +259,12 @@ app.get('/events/:slug', async (req, res) => {
 app.get('/speakers', async (req, res) => {
   try {
     // Fetch all speakers
-    const speakersRes = await axios.get(`${STRAPI_URL}/api/speakers?populate=*`);
+    const speakersRes = await strapiApi.get('/api/speakers', {
+      params: {
+        populate: '*'
+      }
+    });
+    
     const speakers = speakersRes.data.data;
 
     res.render('speakers', { 
@@ -186,11 +272,7 @@ app.get('/speakers', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching speakers:', error);
-    res.render('speakers', { 
-      speakers: [],
-      strapiUrl: STRAPI_URL
-    });
+    handleApiError(error, res, 'Failed to load speakers');
   }
 });
 
@@ -200,7 +282,17 @@ app.get('/speakers/:slug', async (req, res) => {
     const { slug } = req.params;
     
     // Fetch speaker by slug
-    const speakerRes = await axios.get(`${STRAPI_URL}/api/speakers?populate[0]=photo&populate[1]=events&populate[2]=expertise&filters[slug][$eq]=${slug}`);
+    const speakerRes = await strapiApi.get('/api/speakers', {
+      params: {
+        populate: ['photo', 'events', 'expertise'],
+        filters: {
+          slug: {
+            $eq: slug
+          }
+        }
+      }
+    });
+    
     const speaker = speakerRes.data.data[0];
 
     if (!speaker) {
@@ -212,8 +304,7 @@ app.get('/speakers/:slug', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching speaker details:', error);
-    res.status(404).render('404', { message: 'Speaker non trovato' });
+    handleApiError(error, res, 'Failed to load speaker details');
   }
 });
 
@@ -221,7 +312,12 @@ app.get('/speakers/:slug', async (req, res) => {
 app.get('/about', async (req, res) => {
   try {
     // Fetch about content
-    const aboutRes = await axios.get(`${STRAPI_URL}/api/about?populate=*`);
+    const aboutRes = await strapiApi.get('/api/about', {
+      params: {
+        populate: '*'
+      }
+    });
+    
     const about = aboutRes.data.data;
 
     res.render('about', { 
@@ -229,7 +325,9 @@ app.get('/about', async (req, res) => {
       strapiUrl: STRAPI_URL
     });
   } catch (error) {
-    console.error('Error fetching about content:', error);
+    // Don't fail if about page doesn't exist, just render with empty data
+    console.warn('About content not found, rendering empty page', error.message);
+    
     res.render('about', { 
       about: null,
       strapiUrl: STRAPI_URL
@@ -257,8 +355,14 @@ app.post('/contact', async (req, res) => {
     }
     
     // Send to Strapi
-    await axios.post(`${STRAPI_URL}/api/contacts`, {
-      data: { name, email, subject, message }
+    await strapiApi.post('/api/contacts', {
+      data: { 
+        name, 
+        email, 
+        subject, 
+        message,
+        date: new Date().toISOString()
+      }
     });
     
     res.redirect('/contact?success=Messaggio inviato con successo!');
@@ -279,8 +383,12 @@ app.post('/subscribe', async (req, res) => {
     }
     
     // Send to Strapi
-    await axios.post(`${STRAPI_URL}/api/newsletter-subscribers`, {
-      data: { email }
+    await strapiApi.post('/api/newsletter-subscribers', {
+      data: { 
+        email,
+        subscribedAt: new Date().toISOString(),
+        active: true 
+      }
     });
     
     res.json({ success: true, message: 'Iscrizione completata con successo!' });
@@ -288,7 +396,8 @@ app.post('/subscribe', async (req, res) => {
     console.error('Error subscribing to newsletter:', error);
     
     // Check for duplicate email error
-    if (error.response && error.response.status === 409) {
+    if (error.response && error.response.status === 400 && 
+        error.response.data.error.message.includes('already exists')) {
       return res.status(409).json({ success: false, message: 'Email già registrata alla newsletter' });
     }
     
@@ -296,13 +405,34 @@ app.post('/subscribe', async (req, res) => {
   }
 });
 
+// Error page
+app.get('/error', (req, res) => {
+  res.render('error', {
+    title: req.query.title || 'Error',
+    message: req.query.message || 'Something went wrong. Please try again later.'
+  });
+});
+
 // 404 page
 app.use((req, res) => {
   res.status(404).render('404', { message: 'Pagina non trovata' });
 });
 
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).render('error', { 
+    title: 'Server Error',
+    message: 'Something went wrong on our server. Please try again later.'
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Connected to Strapi at ${STRAPI_URL}`);
+  console.log(`🚀 CyberCon frontend server running on port ${PORT}`);
+  console.log(`🔌 Connected to Strapi at ${STRAPI_URL}`);
+  
+  if (!STRAPI_API_TOKEN) {
+    console.warn('⚠️  WARNING: STRAPI_API_TOKEN is not set. API requests may fail!');
+  }
 });
