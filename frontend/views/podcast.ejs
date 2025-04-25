@@ -1,0 +1,200 @@
+<%- include('partials/header') %>
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Podcast</h1>
+        <p>Esplora gli episodi del nostro podcast dedicato alla cybersecurity</p>
+    </div>
+</section>
+
+<!-- Podcast Player (Fixed at top, initially hidden) -->
+<div id="podcast-player" class="podcast-player">
+    <div class="container player-container">
+        <div class="player-info">
+            <h3 id="episode-title">Titolo Episodio</h3>
+        </div>
+        <div class="player-controls">
+            <button id="play-btn" class="player-btn"><i class="fas fa-play"></i></button>
+            <button id="pause-btn" class="player-btn" style="display: none;"><i class="fas fa-pause"></i></button>
+            <div class="progress-container">
+                <input type="range" id="progress-bar" class="progress" min="0" max="100" value="0">
+                <div class="time-info">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+        </div>
+        <audio id="podcast-audio" preload="metadata"></audio>
+    </div>
+</div>
+
+<!-- Podcast Episodes Section -->
+<section class="section podcast-page">
+    <div class="container">
+        <!-- Filter Options -->
+        <div class="filter-options">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Cerca episodi...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="category-filter">
+                <select id="category-select">
+                    <option value="">Tutte le categorie</option>
+                    <!-- Categories would be populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Episodes Grid -->
+        <div class="podcast-episodes-grid">
+            <% if (episodes && episodes.length > 0) { %>
+                <% episodes.forEach(episode => { %>
+                    <div class="episode-card">
+                        <div class="episode-image">
+                            <% if (episode.attributes.coverImage && episode.attributes.coverImage.data) { %>
+                                <img src="<%= strapiUrl + episode.attributes.coverImage.data.attributes.url %>" alt="<%= episode.attributes.title %>">
+                            <% } else { %>
+                                <img src="/images/default-episode.jpg" alt="Episode">
+                            <% } %>
+                            <button class="play-btn play-episode-btn" 
+                                   data-audio="<%= episode.attributes.audioFile && episode.attributes.audioFile.data ? 
+                                   strapiUrl + episode.attributes.audioFile.data.attributes.url : '' %>"
+                                   data-title="<%= episode.attributes.title %>">▶</button>
+                        </div>
+                        <div class="episode-content">
+                            <h3><%= episode.attributes.title %></h3>
+                            <div class="episode-meta">
+                                <span><%= formatDate(episode.attributes.releaseDate) %></span>
+                                <span><%= episode.attributes.duration %></span>
+                            </div>
+                            <p><%= episode.attributes.description.substring(0, 150) %>...</p>
+                            <div class="episode-tags">
+                                <% if (episode.attributes.tags && episode.attributes.tags.length > 0) { %>
+                                    <% episode.attributes.tags.forEach(tag => { %>
+                                        <span class="tag"><%= tag.name %></span>
+                                    <% }) %>
+                                <% } %>
+                            </div>
+                            <a href="/podcast/<%= episode.attributes.slug %>" class="read-more">Scopri di più</a>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="no-content">
+                    <p>Nessun episodio disponibile al momento.</p>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.pageCount > 1) { %>
+            <div class="pagination">
+                <% if (pagination.page > 1) { %>
+                    <a href="/podcast?page=<%= pagination.page - 1 %>" class="pagination-item"><i class="fas fa-chevron-left"></i></a>
+                <% } else { %>
+                    <span class="pagination-item disabled"><i class="fas fa-chevron-left"></i></span>
+                <% } %>
+                
+                <% 
+                let startPage = Math.max(1, pagination.page - 2);
+                let endPage = Math.min(pagination.pageCount, pagination.page + 2);
+                
+                if (startPage > 1) { %>
+                    <a href="/podcast?page=1" class="pagination-item">1</a>
+                    <% if (startPage > 2) { %>
+                        <span class="pagination-dots">...</span>
+                    <% } %>
+                <% } %>
+                
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <% if (i === pagination.page) { %>
+                        <span class="pagination-item active"><%= i %></span>
+                    <% } else { %>
+                        <a href="/podcast?page=<%= i %>" class="pagination-item"><%= i %></a>
+                    <% } %>
+                <% } %>
+                
+                <% if (endPage < pagination.pageCount) { %>
+                    <% if (endPage < pagination.pageCount - 1) { %>
+                        <span class="pagination-dots">...</span>
+                    <% } %>
+                    <a href="/podcast?page=<%= pagination.pageCount %>" class="pagination-item"><%= pagination.pageCount %></a>
+                <% } %>
+                
+                <% if (pagination.page < pagination.pageCount) { %>
+                    <a href="/podcast?page=<%= pagination.page + 1 %>" class="pagination-item"><i class="fas fa-chevron-right"></i></a>
+                <% } else { %>
+                    <span class="pagination-item disabled"><i class="fas fa-chevron-right"></i></span>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</section>
+
+<!-- Subscribe Section -->
+<section class="section subscribe-section">
+    <div class="container">
+        <div class="subscribe-content">
+            <h2>Non perdere nessun episodio</h2>
+            <p>Iscriviti al nostro podcast su tutte le principali piattaforme</p>
+            
+            <div class="podcast-platforms">
+                <a href="#" class="platform-link" target="_blank">
+                    <i class="fab fa-spotify"></i> Spotify
+                </a>
+                <a href="#" class="platform-link" target="_blank">
+                    <i class="fab fa-apple"></i> Apple Podcasts
+                </a>
+                <a href="#" class="platform-link" target="_blank">
+                    <i class="fab fa-google"></i> Google Podcasts
+                </a>
+                <a href="#" class="platform-link" target="_blank">
+                    <i class="fas fa-rss"></i> RSS Feed
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search and filter script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const categorySelect = document.getElementById('category-select');
+    const episodeCards = document.querySelectorAll('.episode-card');
+    
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', performSearch);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+    
+    if (categorySelect) {
+        categorySelect.addEventListener('change', filterByCategory);
+    }
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        window.location.href = `/podcast?search=${encodeURIComponent(searchTerm)}`;
+    }
+    
+    function filterByCategory() {
+        const category = categorySelect.value;
+        if (category) {
+            window.location.href = `/podcast?category=${encodeURIComponent(category)}`;
+        } else {
+            window.location.href = '/podcast';
+        }
+    }
+});
+</script>
+
+<%- include('partials/footer') %>
