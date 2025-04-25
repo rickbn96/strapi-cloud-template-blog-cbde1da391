@@ -1,0 +1,234 @@
+<%- include('partials/header') %>
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Contattaci</h1>
+        <p>Hai domande o vuoi collaborare con noi? Siamo qui per aiutarti</p>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="section contact-section">
+    <div class="container">
+        <% if (success) { %>
+            <div class="alert alert-success">
+                <p><%= success %></p>
+            </div>
+        <% } %>
+        
+        <% if (error) { %>
+            <div class="alert alert-error">
+                <p><%= error %></p>
+            </div>
+        <% } %>
+        
+        <div class="contact-container">
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h3>Email</h3>
+                        <p><a href="mailto:info@cybercon.it">info@cybercon.it</a></p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h3>Telefono</h3>
+                        <p><a href="tel:+390123456789">+39 012 345 6789</a></p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h3>Indirizzo</h3>
+                        <p>Via della Sicurezza, 123<br>20100 Milano, Italia</p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="contact-text">
+                        <h3>Orari</h3>
+                        <p>Lunedì - Venerdì: 9:00 - 18:00<br>Sabato - Domenica: Chiuso</p>
+                    </div>
+                </div>
+                
+                <div class="contact-social">
+                    <h3>Seguici</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-form">
+                <h2>Inviaci un messaggio</h2>
+                <p>Compila il form sottostante e ti risponderemo il prima possibile.</p>
+                
+                <form id="contact-form" method="POST" action="/contact">
+                    <div class="form-group">
+                        <label for="name">Nome Completo *</label>
+                        <input type="text" id="name" name="name" required>
+                        <span id="name-error" class="error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                        <span id="email-error" class="error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Oggetto *</label>
+                        <input type="text" id="subject" name="subject" required>
+                        <span id="subject-error" class="error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Messaggio *</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                        <span id="message-error" class="error"></span>
+                    </div>
+                    
+                    <div class="form-group privacy-check">
+                        <input type="checkbox" id="privacy" name="privacy" required>
+                        <label for="privacy">Ho letto e accetto la <a href="#">Privacy Policy</a> *</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Invia Messaggio</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Google Map -->
+<section class="map-section">
+    <div class="google-map">
+        <iframe 
+            width="100%" 
+            height="450" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0"
+            src="https://maps.google.com/maps?q=Milano,%20Italia&t=&z=13&ie=UTF8&iwloc=&output=embed">
+        </iframe>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="section faq-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Domande Frequenti</h2>
+            <p>Trova risposte alle domande più comuni</p>
+        </div>
+        
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Come posso partecipare al vostro podcast?</h3>
+                    <span class="faq-toggle"><i class="fas fa-plus"></i></span>
+                </div>
+                <div class="faq-answer">
+                    <p>Per partecipare come ospite al nostro podcast, compila il modulo di contatto specificando nell'oggetto "Partecipazione Podcast" e fornendoci informazioni sul tuo background e sull'argomento che vorresti discutere. Valuteremo la tua richiesta e ti contatteremo per ulteriori dettagli.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Organizzate eventi privati per aziende?</h3>
+                    <span class="faq-toggle"><i class="fas fa-plus"></i></span>
+                </div>
+                <div class="faq-answer">
+                    <p>Sì, offriamo eventi personalizzati e workshop per aziende sui temi della cybersecurity. Possiamo adattare i contenuti alle specifiche esigenze della tua organizzazione. Contattaci per discutere delle tue necessità e per ricevere un preventivo.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Come posso sponsorizzare un vostro evento?</h3>
+                    <span class="faq-toggle"><i class="fas fa-plus"></i></span>
+                </div>
+                <div class="faq-answer">
+                    <p>Offriamo diverse opportunità di sponsorizzazione per i nostri eventi. Invia un'email a sponsor@cybercon.it o contattaci tramite questo modulo specificando il tuo interesse nella sponsorizzazione. Ti invieremo la nostra brochure con i diversi pacchetti disponibili.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Gli eventi sono registrati?</h3>
+                    <span class="faq-toggle"><i class="fas fa-plus"></i></span>
+                </div>
+                <div class="faq-answer">
+                    <p>Sì, la maggior parte dei nostri eventi viene registrata. Le registrazioni vengono rese disponibili ai partecipanti dopo l'evento. Alcune sessioni selezionate vengono pubblicate anche sul nostro canale YouTube con il consenso dei relatori.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Posso proporre un argomento per un futuro episodio del podcast?</h3>
+                    <span class="faq-toggle"><i class="fas fa-plus"></i></span>
+                </div>
+                <div class="faq-answer">
+                    <p>Certamente! Apprezziamo i suggerimenti dei nostri ascoltatori. Puoi proporre un argomento compilando il modulo di contatto o inviandoci un messaggio sui nostri canali social. Consideriamo tutte le proposte per i futuri episodi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ toggle script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+            // Toggle active class on the clicked item
+            item.classList.toggle('active');
+            
+            // Toggle icon
+            const icon = item.querySelector('.faq-toggle i');
+            if (icon.classList.contains('fa-plus')) {
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
+            } else {
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+            }
+            
+            // Close other items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item && otherItem.classList.contains('active')) {
+                    otherItem.classList.remove('active');
+                    const otherIcon = otherItem.querySelector('.faq-toggle i');
+                    otherIcon.classList.remove('fa-minus');
+                    otherIcon.classList.add('fa-plus');
+                }
+            });
+        });
+    });
+});
+</script>
+
+<%- include('partials/footer') %>
